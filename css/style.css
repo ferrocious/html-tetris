@@ -1,0 +1,202 @@
+/*
+
+Max aspect ratio about 204 / 247, beyond that stop widening
+and start calculating ALL based on vh.
+
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: #0353A4;
+    background-color: #328cc1;
+    background-color: #c5c1c0;
+    /*background-color: #083c5d; */
+    color: #090C9B;
+    color: #0a1128;
+    color: #1d2731;
+    color: #1a2930;
+    color: #0a1612;
+    
+}
+
+body, header, main, aside, nav, footer {
+    position: absolute;
+}
+
+header {
+    top: 0;
+    height: 15vh;
+    width: 100vw;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 3vh;
+    font-size: 8vh;
+}
+
+h2 {
+    font-size: 4vh;
+    margin: 1vh 0;
+}
+
+#score {
+    font-size: 4vh;
+    background-color: #FEFCFB;
+}
+
+main {
+    top: 15vh;
+    width: 67vw;
+    height: 70vh;
+}
+
+aside {
+    left: 67vw;
+    height: 70vh;
+    top: 15vh;
+    width: 33vw;
+}
+
+nav {
+    width: 100vw;
+    top: 85vh;
+    height: 15vh;
+}
+
+button {
+    background-color: #B4C5E4;
+    background-color: #E4CC37;
+    background-color: #d9b310;
+    background-color: #f7ce3e;
+    font-size: 3vh;
+}
+
+.control-button {
+    width: 27%;
+    height: 70%;
+    margin-right: calc(5% - 2px);
+}
+
+.control-button:last-of-type {
+    margin-right: 0;
+}
+
+.control-button:first-of-type {
+    margin-left: calc(3.5% - 2px);
+}
+
+#well {
+    position: absolute;
+    height: 107.2vw;
+    width: 53.6vw;
+    left: 6.7vw;
+    top: 0;
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: #39393A;
+    border-color: #090C9B;
+    border-color: #0a1128;    
+    border-color: #1d2731;    
+    border-color: #0a1612;    
+}
+
+#next {
+    position: relative;
+    width: 21.44vw;
+    height: 10.72vw;
+    left: calc((33vw - 21.44vw)/2);
+}
+
+aside {
+    padding-top: 5vh;
+    text-align: center;
+}
+
+#new-game {
+    width: 60%;
+    padding: 0.5em;
+    margin-top: 1.5em;
+}
+
+.brick {
+    background-color: orange;
+    background: linear-gradient(to bottom right, #e4cc37, #e18335);
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+    position: absolute;
+}
+
+.live-brick {
+    background: linear-gradient(to bottom right, #f15c25, #9e1617);
+    border-color: midnightblue;
+    z-index: 1;
+}
+
+.dead-brick {
+    background-color: darkslategray;
+    background-image: url('../pic/rock3.JPG');
+    background-size: 1000% 1000%;    
+}
+
+#well > .brick {
+    width: 10%;
+    height: 5%;
+}
+
+#next > .brick {
+    width: 25%;
+    height: 50%;
+}
+
+/*
+
+The UI keeps the well's aspect ratio at 1:2. For a narrow window, all the calculations are based on the view width, as this is where we have the least freedom of maneuver. Conversely, for a window a little wider, we make calculations based on the view height.
+And the additional media query is for windows even wider. At this moment, the UI's aspect ratio gets set in stone, and widening the window further does nothing. Mainly for aesthetic reasons.
+
+*/
+
+@media (min-aspect-ratio: 3/5) {
+    #well {
+        height: 65vh;
+        width: 32.5vh;
+        left: calc((67vw - 32.5vh)/2);
+    }
+    #next {
+        width: 13vh;
+        height: 6.5vh;
+        left: calc((33vw - 13vh)/2);
+    }
+}
+
+@media (min-aspect-ratio: 5/6) {
+    body {
+        left: calc((100vw - 83.33vh)/2);
+    }
+    
+    header, nav {
+        width: 83.33vh;
+    }
+
+    main {
+        width: 55.83vh;
+    }
+
+    aside {
+        left: 55.83vh;
+        width: 27.5vh;
+    }
+
+    #well {
+        left: 11.665vh;
+    }
+
+    #next {
+        left: 7.25vh;
+    }    
+}
