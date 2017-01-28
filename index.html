@@ -2,28 +2,39 @@
 <html>
     <head>
         <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Nova+Mono">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">        
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     </head>
     <body>
         <header>
-            <h1>Title</h1>
+            <h1>TETR(...)</h1>
         </header>
         <main>
             <div id="well">
             </div>
         </main>
         <aside>
-            <h2>Next piece:</h2>
+            <h2>Next:</h2>
             <div id="next">
             </div>
             <h2>Score:</h2>
             <p id = "score">0000</p>
-            <button id="new-game">New Game</button>
+            <button id="new-game"><i>Play!</i></button>
         </aside>
         <nav>
-            <button class = "control-button" id = "left" data-key = "a">A</button>
-            <button class = "control-button" id = "rotate" data-key = "s">S</button>
-            <button class = "control-button" id = "right" data-key = "d">D</button>
+            <button class = "control-button" id = "left" data-key = "a">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                <sub>(A)</sub>
+            </button>
+            <button class = "control-button" id = "rotate" data-key = "s">
+                <i class="fa fa-undo" aria-hidden="true"></i>
+                <sub>(S)</sub>
+            </button>
+            <button class = "control-button" id = "right" data-key = "d">
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            <sub>(D)</sub>
+            </button>
         </nav>
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>

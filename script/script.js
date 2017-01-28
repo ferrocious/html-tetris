@@ -1,35 +1,32 @@
 function htmlWell(htmlTarget, width) {
 
-    this.emptyHtmlList = function(oldList) {    
-// The oldList is expected to be an array of jQuery objects, with a "remove" method. The emptyHtmlList() function 
-// both empties the list and removes the objects from the DOM.
-        if ( (!oldList) || ( oldList.length === 0 ) ) return [];
-        while (oldList.length > 0) {
-            oldList.pop().remove();
-        }
-        //$(".garbage").remove();
-        return oldList;
-    };
+    this.clear = function() {
+        this.htmlTarget.empty();
+    }
     
     this.resetDeadBlocks = function() {
 // Initializes, or re-initializes for a new game, the well.        
         abstractWell.call(this, this.width, 2 * this.width);
         this.deadBlocks = [];
-        this.htmlTarget.empty();
+        this.clear();
+    }
+
+    this.repaint = function() {
+        var newDiv;
+        for (var x = 0; x < this.width; x++) {
+            for (var y = 0; y < this.depth; y++) {
+                if (!this.freeAt (x,y)) {
+                    newDiv = this.createHtmlSquare (x, y);
+                    this.addDeadBrick(newDiv.shake().repaintDead());
+                }  // if...
+            } // for y...
+        } // for x...    
     }
     
     this.rebuildOldBlocks = function() {
 // removes all the fallen bricks and recreates the stack, based on the abstract well
-            this.htmlTarget.empty();
-            var newDiv;
-            for (var x = 0; x < this.width; x++) {
-                for (var y = 0; y < this.depth; y++) {
-                    if (!this.freeAt (x,y)) {
-                        newDiv = this.createHtmlSquare (x, y);
-                        this.addDeadBrick(newDiv.shake().repaintDead());
-                    }  // if...
-                } // for y...
-            } //for x...
+        this.clear();
+        this.repaint();
     }
     
     this.calculateSquareSize = function() {
@@ -46,6 +43,7 @@ function htmlWell(htmlTarget, width) {
         for (var i = 0; i < this.depth; i++) {
             this.sqHeight[i] = (y * i).toFixed(3) + "%";
         }
+        this.startPosition = [4,0];
     }
     
     this.createHtmlSquare = function(x, y) {
@@ -67,6 +65,16 @@ function htmlWell(htmlTarget, width) {
         this.append(brick);
     }
     
+    this.fillWithRubble = function() {
+        for (var y = this.depth - 1; y > this.depth - 4; y--)
+            for (var x = 0; x < this.depth; x++) {
+                if (Math.random() < 0.5) {
+                    this.wellArray[y][x] = 0;
+                }
+            }
+        this.repaint();
+    }
+    
     this.moveHtmlSquare = function (div, x, y) {
         if((x >= this.width) || (y >= this.depth) ) return false;
         return div
@@ -83,23 +91,31 @@ function htmlWell(htmlTarget, width) {
 }
 
 function htmlBlock (well, blockType) {
-    abstractBlock.call(this, well || {}, blockType);    
-    this.emptyHtmlList = this.myWorld.emptyHtmlList;
+
     this.resetBlocks = function() {
-        this.htmlSquares = this.emptyHtmlList(this.htmlSquares) || [];
-    }    
+        this.htmlSquares =  [];
+    }
+    
+    this.rebase = function(newWorld) {
+        this.myWorld = newWorld;
+        this.pos = [this.myWorld.startPosition[0], this.myWorld.startPosition[1]];
+        return this;
+    }
  
     this.initHtml = function() {
         this.resetBlocks();
         var newDiv;
         for (var i = 0; i < this.xy.length; i++ ) {
-            newDiv = this.myWorld.createHtmlSquare (this.pos[0] + this.xy[i][0], 
-                                                   this.pos[1] + this.xy[i][1]);
+            newDiv = $("<div></div>").basicSquare (0, 0);
+            this.myWorld.moveHtmlSquare(
+                newDiv,
+                this.pos[0] + this.xy[i][0],
+                this.pos[1] + this.xy[i][1]);                    
             this.myWorld.append(newDiv);
             this.htmlSquares.push(newDiv);
-        }    
+        }
     }
-        
+
     this.addClass = function (newClass) {
         for (var i = 0; i < this.htmlSquares.length; i++) {
             this.htmlSquares[i].addClass(newClass);
@@ -143,6 +159,9 @@ function htmlBlock (well, blockType) {
         }
         return rows;
     }
+    abstractBlock.call(this, well || {}, blockType);    
+    this.rebase(well);
+    
 }
 
 $.fn.basicSquare = function(x, y) {
@@ -171,11 +190,18 @@ $.fn.shakeEach = function() {
     });
 }
 
-var well, currentBlock, nextBlock, lineCount = 0, step = 250, timeoutNumber, animationNumber, scoreHtml;
+var well, preview, currentBlock, nextBlock, lineCount = 0, step = 250, timeoutNumber, animationNumber, scoreHtml;
 
-function getNewBlock(well) {
-    currentBlock = new htmlBlock(well);
+function getNewBlock(well, preview) {
+    currentBlock = nextBlock;
+    currentBlock.rebase(well);
+//    currentBlock.myWorld = well;
+//    currentBlock.pos = [5,0];
+    preview.clear();
     currentBlock.initHtml();
+    nextBlock = new htmlBlock(preview);
+//    nextBlock.pos = [2,0];
+    nextBlock.initHtml();
 }
 
 function readKeyboard(e) {
@@ -199,7 +225,7 @@ function animationLoop() {
     if(currentBlock)
         currentBlock.updateHtml();
     scoreHtml.html(lineCount.toString());
-    window.requestAnimationFrame(animationLoop);
+    animationNumber = window.requestAnimationFrame(animationLoop);
 }
 
 function gameLoop() {
@@ -209,9 +235,13 @@ function gameLoop() {
         timeoutNumber = setTimeout (gameLoop, step);
     } else {
 // and if it cannot: update the well with new bricks,
+        currentBlock.updateHtml(); // that additional updateHtml, out of the animation loop, is necessary, 
+                                    // as every now and then, weird timing would make a brick "killed" before
+                                    // the last update of the graphical representation was made. Result: a brick
+                                    // apparently hovering one row too high.
         lineCount += currentBlock.done();
 // get another block: can it move at all?
-        getNewBlock(well);
+        getNewBlock(well, preview);
         if (currentBlock.collision(currentBlock.xy, currentBlock.pos)) {
             console.log ("Game over.");
             return;
@@ -221,16 +251,27 @@ function gameLoop() {
 }
 
 function initGame() {
+    nextBlock = new htmlBlock(preview);
     lineCount = 0;
     if(timeoutNumber) clearTimeout(timeoutNumber);
     well.resetDeadBlocks();
-    getNewBlock(well);
+    getNewBlock(well, preview);
     timeoutNumber = setTimeout(gameLoop, step);
     animationNumber = animationLoop();
 }
 
+function initPreview(htmlTarget) {
+    preview = Object.create(well);
+    preview.htmlTarget = htmlTarget;
+    preview.sqHeight = ["0", "50%"];
+    preview.sqWidth = ["0", "25%", "50%", "75%"];
+    preview.startPosition = [2, 0];
+}
+
 window.onload =  function initAll() {
     well = new htmlWell($("#well"));
+    initPreview($("#next"));
+    well.fillWithRubble();
     scoreHtml = $("#score");
     $("body").on("keypress", readKeyboard);
     $("#left").click(readButton);

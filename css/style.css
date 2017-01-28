@@ -1,27 +1,12 @@
-/*
-
-Max aspect ratio about 204 / 247, beyond that stop widening
-and start calculating ALL based on vh.
-
-*/
-
 * {
     box-sizing: border-box;
     margin: 0;
 }
 
 body {
-    font-family: sans-serif;
-    background-color: #0353A4;
-    background-color: #328cc1;
+    font-family: "Lato", sans-serif;
     background-color: #c5c1c0;
-    /*background-color: #083c5d; */
-    color: #090C9B;
-    color: #0a1128;
-    color: #1d2731;
-    color: #1a2930;
-    color: #0a1612;
-    
+    color: #0a1612;    
 }
 
 body, header, main, aside, nav, footer {
@@ -35,49 +20,53 @@ header {
     text-align: center;
 }
 
-h1 {
-    margin-top: 3vh;
-    font-size: 8vh;
-}
-
-h2 {
-    font-size: 4vh;
-    margin: 1vh 0;
-}
-
-#score {
-    font-size: 4vh;
-    background-color: #FEFCFB;
-}
-
 main {
     top: 15vh;
     width: 67vw;
-    height: 70vh;
+    height: 116.67vw;
 }
 
 aside {
     left: 67vw;
-    height: 70vh;
+    height: 116.67vw;
     top: 15vh;
     width: 33vw;
+    text-align: center;
 }
 
 nav {
     width: 100vw;
-    top: 85vh;
+    top: calc(15vh + 116.67vw);
     height: 15vh;
 }
 
+h1 {
+    margin-top: 5vw;
+    font-size: 13.33vw;
+}
+
+h2 {
+    font-size: 6.67vw;
+    margin: 1.6vh 0;
+    padding: 0 0.4em;
+}
+
 button {
-    background-color: #B4C5E4;
-    background-color: #E4CC37;
-    background-color: #d9b310;
     background-color: #f7ce3e;
-    font-size: 3vh;
+    font-size: 5vw;
+    color: #1a2930;
+}
+
+button > sub {
+    font-size: 0.75em;
+}
+
+button > i {
+    color: #0a1612;
 }
 
 .control-button {
+    text-align: center;
     width: 27%;
     height: 70%;
     margin-right: calc(5% - 2px);
@@ -99,10 +88,6 @@ button {
     top: 0;
     border-width: 0 5px 5px 5px;
     border-style: solid;
-    border-color: #39393A;
-    border-color: #090C9B;
-    border-color: #0a1128;    
-    border-color: #1d2731;    
     border-color: #0a1612;    
 }
 
@@ -113,20 +98,26 @@ button {
     left: calc((33vw - 21.44vw)/2);
 }
 
-aside {
-    padding-top: 5vh;
-    text-align: center;
-}
-
 #new-game {
     width: 60%;
     padding: 0.5em;
     margin-top: 1.5em;
 }
 
+#score {
+    font-size: 5.83vw;
+    font-family: 'Nova Mono', monospace;
+    background-color: #FEFCFB;
+    width: 60%;
+    margin-left: 20%;
+    text-align: right;
+    padding-right: 0.5em;
+}
+
+
 .brick {
     background-color: orange;
-    background: linear-gradient(to bottom right, #e4cc37, #e18335);
+    background: linear-gradient(to bottom right, #e4cc37, orangered);
     border-bottom: 1px solid black;
     border-right: 1px solid black;
     position: absolute;
@@ -156,12 +147,42 @@ aside {
 
 /*
 
-The UI keeps the well's aspect ratio at 1:2. For a narrow window, all the calculations are based on the view width, as this is where we have the least freedom of maneuver. Conversely, for a window a little wider, we make calculations based on the view height.
-And the additional media query is for windows even wider. At this moment, the UI's aspect ratio gets set in stone, and widening the window further does nothing. Mainly for aesthetic reasons.
+The UI keeps the well's aspect ratio at 1:2. For a narrow window, the calculations are based mostly on the viewport's width, as that is where we have the least freedom of maneuver. Conversely, for a window a little wider, we make calculations based on the view height.
+And the additional media query is for windows even wider. At this moment, the UI's aspect ratio gets set in stone, and widening the window further does nothing. 
 
 */
 
 @media (min-aspect-ratio: 3/5) {
+    h1 {
+        margin-top: 3vh;
+        font-size: 8vh;
+    }
+    h2 {
+        font-size: 4vh;
+        margin: 1vh 0;       
+    }
+    main {
+        width: 67vw;
+        height: 70vh;
+    }
+
+    aside {
+        left: 67vw;
+        height: 70vh;
+        width: 33vw;
+        text-align: center;
+    }
+
+    nav {
+        width: 100vw;
+        top: 85vh;
+        height: 15vh;
+    }    
+    
+    #score {
+        font-size: 3.5vh;
+        background-color: #FEFCFB;
+    }    
     #well {
         height: 65vh;
         width: 32.5vh;
@@ -171,6 +192,9 @@ And the additional media query is for windows even wider. At this moment, the UI
         width: 13vh;
         height: 6.5vh;
         left: calc((33vw - 13vh)/2);
+    }
+    button {
+        font-size: 3vh;
     }
 }
 
