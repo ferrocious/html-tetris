@@ -116,15 +116,13 @@ button > i {
 
 
 .brick {
-    background-color: orange;
-    background: linear-gradient(to bottom right, #e4cc37, orangered);
     border-bottom: 1px solid black;
     border-right: 1px solid black;
     position: absolute;
 }
 
 .live-brick {
-    background: linear-gradient(to bottom right, #f15c25, #9e1617);
+    background: linear-gradient(to bottom right, #f15c25, orangered);
     border-color: midnightblue;
     z-index: 1;
 }

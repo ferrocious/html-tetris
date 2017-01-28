@@ -43,7 +43,8 @@ function htmlWell(htmlTarget, width) {
         for (var i = 0; i < this.depth; i++) {
             this.sqHeight[i] = (y * i).toFixed(3) + "%";
         }
-        this.startPosition = [4,0];
+        this.startPosition = [Math.floor(this.width / 2 ) - 1,
+                              0];
     }
     
     this.createHtmlSquare = function(x, y) {
@@ -167,12 +168,16 @@ function htmlBlock (well, blockType) {
 $.fn.basicSquare = function(x, y) {
     return this
         .addClass("brick")
+        .addClass("live-brick")
         .css("left", x)
         .css("top", y);
 }
 
 $.fn.repaintDead = function() {
-    return this.addClass("dead-brick").css(
+    return this
+        .removeClass("live-brick")
+        .addClass("dead-brick")
+        .css(
         "background-position", 
         "-" + this.css("left") + " -" + this.css("top")
         );
@@ -250,7 +255,22 @@ function gameLoop() {
     }
 }
 
-function initGame() {
+function resizeGame(x) {
+    var width = (100 / x).toFixed(3) + "%",
+        height = (50 / x).toFixed(3) + "%";
+    var newcss = "#well > .brick { width: " +
+        width +
+        "; height: " +
+        height + 
+        "; }";
+    well.clear();
+    well = new htmlWell($("#well"), x);
+    $("head").find("#dynamic-style").remove();
+    $("head").append('<style id = "dynamic-style"><style>');
+    $("#dynamic-style").html(newcss);
+}
+
+function initGame(x) {
     nextBlock = new htmlBlock(preview);
     lineCount = 0;
     if(timeoutNumber) clearTimeout(timeoutNumber);
