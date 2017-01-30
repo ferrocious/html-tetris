@@ -195,22 +195,31 @@ $.fn.shakeEach = function() {
     });
 }
 
-var well, preview, currentBlock, nextBlock, lineCount = 0, step = 250, timeoutNumber, animationNumber, scoreHtml;
+var $scoreHtml,
+    $gameOver,
+    $styleSlot,
+    $well,
+    $paused,
+    well,
+    preview,
+    currentBlock, 
+    nextBlock,
+    lineCount = 0, 
+    step = 250, 
+    gameLoopId, 
+    animationId;
 
 function getNewBlock(well, preview) {
     currentBlock = nextBlock;
     currentBlock.rebase(well);
-//    currentBlock.myWorld = well;
-//    currentBlock.pos = [5,0];
     preview.clear();
     currentBlock.initHtml();
     nextBlock = new htmlBlock(preview);
-//    nextBlock.pos = [2,0];
     nextBlock.initHtml();
 }
 
 function readKeyboard(e) {
-    switch (e.key) {
+    switch (e.key.toLowerCase()) {
         case "a": currentBlock.moveLeft();
             break;
         case "d": currentBlock.moveRight();
@@ -218,6 +227,8 @@ function readKeyboard(e) {
         case "s": currentBlock.rotate();
             break;
         case " ": currentBlock.stepDown();
+            break;
+        case "p": pauseGame();
         }
 }
 
@@ -229,15 +240,15 @@ function readButton() {
 function animationLoop() {
     if(currentBlock)
         currentBlock.updateHtml();
-    scoreHtml.html(lineCount.toString());
-    animationNumber = window.requestAnimationFrame(animationLoop);
+    $scoreHtml.html(lineCount.toString());
+    animationId = window.requestAnimationFrame(animationLoop);
 }
 
 function gameLoop() {
     if(currentBlock.stepDown()) {
 // if it can fall, let it
         currentBlock.updateHtml();
-        timeoutNumber = setTimeout (gameLoop, step);
+        gameLoopId = setTimeout (gameLoop, step);
     } else {
 // and if it cannot: update the well with new bricks,
         currentBlock.updateHtml(); // that additional updateHtml, out of the animation loop, is necessary, 
@@ -249,10 +260,37 @@ function gameLoop() {
         getNewBlock(well, preview);
         if (currentBlock.collision(currentBlock.xy, currentBlock.pos)) {
             console.log ("Game over.");
+            gameOver();
             return;
         }
-    timeoutNumber = setTimeout(gameLoop, step);    
+    gameLoopId = setTimeout(gameLoop, step);    
     }
+}
+
+function gameOver() {
+    $gameOver.show();
+    if(gameLoopId)
+        window.clearTimeout(gameLoopId);
+    if(animationId)
+        window.cancelAnimationFrame(animationId);
+    currentBlock = null;
+}
+
+function resumeGame() {
+    gameLoopId = setTimeout(gameLoop, step);
+    animationId = window.requestAnimationFrame(animationLoop);
+    $paused.hide();
+}
+
+function pauseGame() {
+    if (gameLoopId) {
+        clearTimeout(gameLoopId);
+        if (animationId)
+            window.cancelAnimationFrame(animationId);
+        gameLoopId = animationId = 0;
+        $paused.show();
+    } else
+        resumeGame();
 }
 
 function resizeGame(x) {
@@ -264,20 +302,21 @@ function resizeGame(x) {
         height + 
         "; }";
     well.clear();
-    well = new htmlWell($("#well"), x);
-    $("head").find("#dynamic-style").remove();
-    $("head").append('<style id = "dynamic-style"><style>');
-    $("#dynamic-style").html(newcss);
+    well = new htmlWell($well, x);
+    $styleSlot.empty().html(newcss);
 }
 
+
 function initGame(x) {
+    x = x || 10;
+    $gameOver.hide();
     nextBlock = new htmlBlock(preview);
     lineCount = 0;
-    if(timeoutNumber) clearTimeout(timeoutNumber);
+    if(gameLoopId) clearTimeout(gameLoopId);
     well.resetDeadBlocks();
     getNewBlock(well, preview);
-    timeoutNumber = setTimeout(gameLoop, step);
-    animationNumber = animationLoop();
+    gameLoopId = setTimeout(gameLoop, step);
+    animationId = animationLoop();
 }
 
 function initPreview(htmlTarget) {
@@ -289,14 +328,21 @@ function initPreview(htmlTarget) {
 }
 
 window.onload =  function initAll() {
+    $well = $("#well");
     well = new htmlWell($("#well"));
     initPreview($("#next"));
     well.fillWithRubble();
-    scoreHtml = $("#score");
+    $scoreHtml = $("#score");
+    $gameOver = $("#game-over");
+    $styleSlot = $("#dynamic");
+    $paused = $("#paused");
     $("body").on("keypress", readKeyboard);
     $("#left").click(readButton);
     $("#right").click(readButton);
     $("#rotate").click(readButton);
+    $well.click(pauseGame);
+    $paused.click(pauseGame);
+    $gameOver.click(initGame);
     $("#new-game").click(
         function() {
             this.blur();

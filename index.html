@@ -3,16 +3,25 @@
     <head>
         <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Nova+Mono">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+        <style id="dynamic"></style>
     </head>
     <body>
         <header>
+            <a href="#" id = "home"><i class="fa fa-home"></i></a>
             <h1>TETR(...)</h1>
+            <a href="#" id="setup"><i class="fa fa-cog"></i></a>            
         </header>
         <main>
             <div id="well">
             </div>
+            <h1 id="game-over">Game over!</h1>
+            <h1 id="paused">paused...</h1>
+            <form id="setup-dialog">
+                <input type="range" min = "8" max = "100" value = "10" id = "width-slider">
+                <input type="number" min = "8" max = "100" value = "10" id = "width-box">
+            </form>
         </main>
         <aside>
             <h2>Next:</h2>
@@ -20,7 +29,7 @@
             </div>
             <h2>Score:</h2>
             <p id = "score">0000</p>
-            <button id="new-game"><i>Play!</i></button>
+            <button id="new-game">Play!</button>
         </aside>
         <nav>
             <button class = "control-button" id = "left" data-key = "a">

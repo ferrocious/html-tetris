@@ -4,13 +4,22 @@
 }
 
 body {
+    margin-top: 5vw;
     font-family: "Lato", sans-serif;
     background-color: #c5c1c0;
-    color: #0a1612;    
+    color: #0a1612;
 }
 
-body, header, main, aside, nav, footer {
+#setup-dialog {
+    
+}
+
+body, header, main, aside, nav, footer, a {
     position: absolute;
+}
+
+a {
+    color: rgb(85,26,139);
 }
 
 header {
@@ -40,21 +49,34 @@ nav {
     height: 15vh;
 }
 
-h1 {
-    margin-top: 5vw;
+h1, a {
     font-size: 13.33vw;
+    display: inline-block;    
+}
+
+#setup {
+    left: 85%;
+}
+
+#home {
+    left: 5%;
 }
 
 h2 {
     font-size: 6.67vw;
-    margin: 1.6vh 0;
+    margin: 3vh 0 2vh;
     padding: 0 0.4em;
 }
 
+h2:first-of-type {
+    margin-top: 1vh;
+}
+
 button {
-    background-color: #f7ce3e;
+    background-color: #f7c331;
     font-size: 5vw;
     color: #1a2930;
+    border-width: 1px;
 }
 
 button > sub {
@@ -63,6 +85,24 @@ button > sub {
 
 button > i {
     color: #0a1612;
+}
+
+.brick {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+    position: absolute;
+}
+
+.live-brick {
+    background: linear-gradient(to bottom right, #f7c331, #ff4500);
+    border-color: midnightblue;
+    z-index: 1;
+}
+
+.dead-brick {
+    background-color: darkslategray;
+    background-image: url('../pic/rock3.JPG');
+    background-size: 1000% 1000%;    
 }
 
 .control-button {
@@ -102,6 +142,8 @@ button > i {
     width: 60%;
     padding: 0.5em;
     margin-top: 1.5em;
+    margin-top: 7vh;
+    font-style: italic;
 }
 
 #score {
@@ -114,24 +156,35 @@ button > i {
     padding-right: 0.5em;
 }
 
-
-.brick {
-    border-bottom: 1px solid black;
-    border-right: 1px solid black;
+#game-over, #paused, #setup-dialog {
     position: absolute;
+    background-color: #FEFCFB;
+    width: 90%;
+    left: 5%;
+    top: 20%;
+    font-style: italic;
+    text-align: center;
+    padding: 1em 0.3em;
+    margin: 0;
+    color: #1a2930;
+    border: 2px groove #1a2930;
+    outline: 1px solid #f7c331;
+    box-shadow: 0px 0px 24px 8px #f7c331;
+    display: none;
+    z-index: 2;
+    cursor: default;
+    opacity: 0.95;
 }
 
-.live-brick {
-    background: linear-gradient(to bottom right, #f15c25, orangered);
-    border-color: midnightblue;
-    z-index: 1;
+
+#setup-dialog {
+    box-shadow: 0px 0px 8px 2px #f7c331;
+    display: block;
+    display: none;
 }
 
-.dead-brick {
-    background-color: darkslategray;
-    background-image: url('../pic/rock3.JPG');
-    background-size: 1000% 1000%;    
-}
+
+
 
 #well > .brick {
     width: 10%;
@@ -151,13 +204,14 @@ And the additional media query is for windows even wider. At this moment, the UI
 */
 
 @media (min-aspect-ratio: 3/5) {
-    h1 {
+    body {
         margin-top: 3vh;
+    }
+    h1, a {
         font-size: 8vh;
     }
     h2 {
         font-size: 4vh;
-        margin: 1vh 0;       
     }
     main {
         width: 67vw;
