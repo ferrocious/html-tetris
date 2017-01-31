@@ -11,7 +11,7 @@
         <header>
             <a href="#" id = "home"><i class="fa fa-home"></i></a>
             <h1>TETR(...)</h1>
-            <a href="#" id="setup"><i class="fa fa-cog"></i></a>            
+            <a href="#" id = "setup-width"><i class="fa fa-cog"></i></a>            
         </header>
         <main>
             <div id="well">
@@ -19,8 +19,11 @@
             <h1 id="game-over">Game over!</h1>
             <h1 id="paused">paused...</h1>
             <form id="setup-dialog">
-                <input type="range" min = "8" max = "100" value = "10" id = "width-slider">
-                <input type="number" min = "8" max = "100" value = "10" id = "width-box">
+              <span id="close-width-dialog">X</span>
+               <legend>The well's width:</legend>
+                <input type="range" min = "7" max = "40" value = "10" id = "width-slider">
+                <input type="number" min = "7" max = "40" value = "10" id = "width-box">
+                <button id="submit" type = submit>OK</button>
             </form>
         </main>
         <aside>

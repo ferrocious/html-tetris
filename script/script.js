@@ -200,6 +200,13 @@ var $scoreHtml,
     $styleSlot,
     $well,
     $paused,
+    $widthBox,
+    $widthSlider,
+    $setupDialog,
+    paused = false,
+    maxWidth,
+    minWidth,
+    currentWidth = 10,
     well,
     preview,
     currentBlock, 
@@ -228,7 +235,7 @@ function readKeyboard(e) {
             break;
         case " ": currentBlock.stepDown();
             break;
-        case "p": pauseGame();
+        case "p": togglePause();
         }
 }
 
@@ -259,7 +266,6 @@ function gameLoop() {
 // get another block: can it move at all?
         getNewBlock(well, preview);
         if (currentBlock.collision(currentBlock.xy, currentBlock.pos)) {
-            console.log ("Game over.");
             gameOver();
             return;
         }
@@ -283,14 +289,67 @@ function resumeGame() {
 }
 
 function pauseGame() {
-    if (gameLoopId) {
-        clearTimeout(gameLoopId);
-        if (animationId)
-            window.cancelAnimationFrame(animationId);
-        gameLoopId = animationId = 0;
+    if (gameLoopId)
+        window.clearTimeout(gameLoopId);
+    if (animationId)
+        window.cancelAnimationFrame(animationId);
+    gameLoopId = animationId = 0;
+    paused = true;
+}
+
+function unpauseGame() {
+    $paused.hide();
+    paused = false;
+    resumeGame();
+}
+
+function togglePause() {
+    if (paused) {
+        unpauseGame();
+    } else {
         $paused.show();
-    } else
-        resumeGame();
+        pauseGame();
+    }
+}
+
+function bringResizeDialog() {
+    pauseGame();
+    $paused.hide();
+    $widthBox.val(currentWidth);
+    $widthSlider.val(currentWidth);
+    $setupDialog.show();    
+}
+
+function shutResizeDialog() {
+    $setupDialog.hide();
+    unpauseGame();
+}
+
+function submitChange(e) {
+    currentWidth = parseInt($widthBox.val());
+    resizeGame(currentWidth);
+    $setupDialog.hide();
+    return false;
+}
+
+function handleChange() {
+    maxWidth = parseInt($widthBox.attr("max"));
+    minWidth = parseInt($widthBox.attr("min"));
+//    $widthBox.submit(submitChange);
+    $setupDialog.submit(submitChange);
+    $widthSlider.change(function(e) {
+        $widthBox.val(e.target.value);
+    });
+    $widthBox.change(function(e) {
+        var val = parseInt($widthBox.val());
+        if(val > maxWidth) {
+            $widthBox.val(maxWidth.toString());
+        }
+        if(val < minWidth) {
+            $widthBox.val(minWidth.toString());
+        }        
+        $widthSlider.val($widthBox.val());
+    });
 }
 
 function resizeGame(x) {
@@ -304,15 +363,15 @@ function resizeGame(x) {
     well.clear();
     well = new htmlWell($well, x);
     $styleSlot.empty().html(newcss);
+    well.fillWithRubble();
+    paused = false;
 }
 
-
-function initGame(x) {
-    x = x || 10;
+function initGame() {
     $gameOver.hide();
     nextBlock = new htmlBlock(preview);
     lineCount = 0;
-    if(gameLoopId) clearTimeout(gameLoopId);
+    if(gameLoopId) window.clearTimeout(gameLoopId);
     well.resetDeadBlocks();
     getNewBlock(well, preview);
     gameLoopId = setTimeout(gameLoop, step);
@@ -328,20 +387,31 @@ function initPreview(htmlTarget) {
 }
 
 window.onload =  function initAll() {
+
+// First, cache the DOM elements.    
     $well = $("#well");
-    well = new htmlWell($("#well"));
-    initPreview($("#next"));
-    well.fillWithRubble();
     $scoreHtml = $("#score");
     $gameOver = $("#game-over");
     $styleSlot = $("#dynamic");
     $paused = $("#paused");
+    $widthBox = $("#width-box");
+    $widthSlider = $("#width-slider");
+    $setupDialog = $("#setup-dialog");
+    
+// Second, init the logic of the well and the preview window.    
+    
+    well = new htmlWell($("#well"));
+    initPreview($("#next"));
+    well.fillWithRubble();
+    
+// Third, attach listeners.    
+    
     $("body").on("keypress", readKeyboard);
     $("#left").click(readButton);
     $("#right").click(readButton);
     $("#rotate").click(readButton);
-    $well.click(pauseGame);
-    $paused.click(pauseGame);
+    $well.click(togglePause);
+    $paused.click(togglePause);
     $gameOver.click(initGame);
     $("#new-game").click(
         function() {
@@ -349,4 +419,7 @@ window.onload =  function initAll() {
             initGame();
         }
     );
+    handleChange();
+    $("#setup-width").click(bringResizeDialog);
+    $("#close-width-dialog").click(shutResizeDialog);
 }
