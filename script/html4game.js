@@ -1,34 +1,70 @@
-function htmlWell(htmlTarget, width) {
+function HTMLWell(htmlTarget, width) {
 
     this.clear = function() {
         this.htmlTarget.empty();
     }
     
+    this.append = function (elem) {
+        this.htmlTarget.append(elem);
+    }    
+
+    this.createHtmlSquare = function(x, y) {
+/* Builds a basic square building block of the game; x and y are expressed in abstract coordinates.
+If the given position is already occupied, the function does nothing and returns false. */
+        var newDiv = $("<div></div>").basicSquare(this.sqWidth[1], this.sqHeight[1]);
+        if(this.moveHtmlSquare(newDiv, x, y) ) {
+            this.append(newDiv);
+            return newDiv;
+        } else
+            return false;
+    }
+
+    this.moveHtmlSquare = function (div, x, y) {
+    // Simple: if movable, that is, if the indicated place in the well is unocuppied - move it.
+        if((x >= this.width) || (y >= this.depth) ) return false;
+        return div
+            .css("left", this.sqWidth[x])
+            .css("top", this.sqHeight[y])
+    };    
+    
     this.resetDeadBlocks = function() {
 // Initializes, or re-initializes for a new game, the well.        
-        abstractWell.call(this, this.width, 2 * this.width);
+        AbstractWell.call(this, this.width, 2 * this.width);
         this.deadBlocks = [];
         this.clear();
     }
 
-    this.repaint = function() {
-        var newDiv;
-        for (var x = 0; x < this.width; x++) {
-            for (var y = 0; y < this.depth; y++) {
-                if (!this.freeAt (x,y)) {
-                    newDiv = this.createHtmlSquare (x, y);
-                    this.addDeadBrick(newDiv.shake().repaintDead());
-                }  // if...
-            } // for y...
-        } // for x...    
-    }
-    
     this.rebuildOldBlocks = function() {
 // removes all the fallen bricks and recreates the stack, based on the abstract well
         this.clear();
         this.repaint();
     }
-    
+
+    this.repaint = function() {
+// "Repaint" mean: put again visual representation of dead bricks on screen.
+        var newDiv;
+        for (var x = 0; x < this.width; x++) {
+            for (var y = 0; y < this.depth; y++) {
+                if (!this.freeAt (x,y)) {
+                    newDiv = this.createHtmlSquare (x, y);
+                    this.append(newDiv.repaintDead());
+                }  // if...
+            } // for y...
+        } // for x...    
+    }
+        
+    this.fillWithRubble = function() {
+/* Haphazardly drops some bricks at the bottom of the well. It's used solely for decoration and as a visual
+    hint at relative sizes of the well and the bricks. */
+        for (var y = this.depth - 1; y > this.depth - 5; y--)
+            for (var x = 0; x < this.depth; x++) {
+                if (Math.random() < 0.5) {
+                    this.wellArray[y][x] = 0;
+                }
+            }
+        this.repaint();
+    }
+
     this.calculateSquareSize = function() {
 /* Sets the size of a basic square. For a default, 10-wide, 20-high well, the basic square would be 10% wide and 5% high. Which does make a square.
    Also, caches the coordinates, expressed in %, of every field on the board. Hence, if we want to put a square with the coordinates        
@@ -42,46 +78,9 @@ function htmlWell(htmlTarget, width) {
         for (var i = 0; i < this.depth; i++) {
             this.sqHeight[i] = (y * i).toFixed(3) + "%";
         }
-        this.startPosition = [Math.floor(this.width / 2 ) - 1,
-                              0];
     }
-    
-    this.createHtmlSquare = function(x, y) {
-        var newDiv = $("<div></div>").basicSquare(this.sqWidth[1], this.sqHeight[1]);
-        if(this.moveHtmlSquare(newDiv, x, y) ) {
-            this.htmlTarget.append(newDiv);
-            return newDiv;
-        } else
-            return false;
-    }
-    
-    this.append = function (elem) {
-        this.htmlTarget.append(elem);
-    }
-    
-    this.addDeadBrick = function(brick) {
-// takes a single html basic square, jQuery-wrapped, and appends to the well
-        this.deadBlocks.push(brick);
-        this.append(brick);
-    }
-    
-    this.fillWithRubble = function() {
-        for (var y = this.depth - 1; y > this.depth - 4; y--)
-            for (var x = 0; x < this.depth; x++) {
-                if (Math.random() < 0.5) {
-                    this.wellArray[y][x] = 0;
-                }
-            }
-        this.repaint();
-    }
-    
-    this.moveHtmlSquare = function (div, x, y) {
-        if((x >= this.width) || (y >= this.depth) ) return false;
-        return div
-            .css("left", this.sqWidth[x])
-            .css("top", this.sqHeight[y])
-    };
-        
+            
+// The constructor goes here.
     this.sqWidth = [];
     this.sqHeight = [];
     this.htmlTarget = htmlTarget;    
@@ -90,19 +89,21 @@ function htmlWell(htmlTarget, width) {
     this.calculateSquareSize();    
 }
 
-function htmlBlock (well, blockType) {
+function HTMLBlock (well, blockType) {
+// Methods and properties for a 4-square block.
 
-    this.resetBlocks = function() {
-        this.htmlSquares =  [];
-    }
-    
     this.rebase = function(newWorld) {
         this.myWorld = newWorld;
         this.pos = [this.myWorld.startPosition[0], this.myWorld.startPosition[1]];
         return this;
     }
- 
+    
+    this.resetBlocks = function() {
+        this.htmlSquares =  [];
+    }
+     
     this.initHtml = function() {
+// Initializes the visual representation of the 4-square block, placing it according to its 'pos' property.
         this.resetBlocks();
         var newDiv;
         for (var i = 0; i < this.xy.length; i++ ) {
@@ -116,7 +117,20 @@ function htmlBlock (well, blockType) {
         }
         return this;
     }
-
+    
+    this.updateHtml = function() {
+// Moves a block if its visual representation exists, creates if doesn't.
+        if (this.htmlSquares) 
+            for (var i = 0; i < this.htmlSquares.length; i++ ) {
+                this.myWorld.moveHtmlSquare(
+                    this.htmlSquares[i],
+                    this.pos[0] + this.xy[i][0],
+                    this.pos[1] + this.xy[i][1]
+                );
+            } else
+                this.initHtml();
+    }
+    
     this.addClass = function (newClass) {
         for (var i = 0; i < this.htmlSquares.length; i++) {
             this.htmlSquares[i].addClass(newClass);
@@ -130,29 +144,16 @@ function htmlBlock (well, blockType) {
         }
         return this;
     }
-    
-    this.updateHtml = function() {
-        if (this.htmlSquares) 
-            for (var i = 0; i < this.htmlSquares.length; i++ ) {
-                this.myWorld.moveHtmlSquare(
-                    this.htmlSquares[i],
-                    this.pos[0] + this.xy[i][0],
-                    this.pos[1] + this.xy[i][1]
-                );
-            } else
-                this.initHtml();
-    }
-    
+        
     this.done = function() {
+/* When we're done with a block (it's fallen to the bottom), we: update the well's abstract model, paint the brick dead, and also tells the well to find and remove any full rows. Returns their number, if there were any.
+*/
         var block,
             rows;
         while (this.htmlSquares.length > 0) {
             block = this.htmlSquares.pop();
-            this.myWorld.addDeadBrick(
-                block
-                    .shake()
-                    .repaintDead()                
-        );}
+            this.myWorld.append(block.repaintDead());
+        }
         this.myWorld.update(this);
         rows = this.myWorld.findFullRows();
         if ( rows > 0 ) {
@@ -160,11 +161,14 @@ function htmlBlock (well, blockType) {
         }
         return rows;
     }
-    abstractBlock.call(this, well || {}, blockType);    
+    
+    // The constructor here.
+    AbstractBlock.call(this, well || {}, blockType);    
     this.rebase(well);
     
 }
 
+// And here goes our tiny little jQuery plugin.
 $.fn.basicSquare = function(x, y) {
     return this
         .addClass("brick")
@@ -177,9 +181,10 @@ $.fn.repaintDead = function() {
     return this
         .removeClass("live-brick")
         .addClass("dead-brick")
+        .shake()
         .css(
         "background-position", 
-        "-" + this.css("left") + " -" + this.css("top")
+        "-" + this.css("left") + " -" + this.css("top")        
         );
 }
 
@@ -190,7 +195,7 @@ $.fn.shake = function() {
 }
 
 $.fn.shakeEach = function() {
-    return this.each(function (index, brick) {
-        $(brick).shake();
-    });
+    return this.each(function(index, elem) {
+        return $(elem).shake();
+    })
 }

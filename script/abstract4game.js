@@ -1,4 +1,4 @@
-function abstractBlock (myWorld, blockType) {
+function AbstractBlock (myWorld, blockType) {
 
 // Abstract properties and methods for a 4-block, indifferent to the graphic representation. Creating, moving, rotating, detecting collisions.    
 // Call it with an abstractWell as a parameter. The optional "blockType" can be: 's', 'z', 't', 'i', 'l', 'o' (roughly similar to uppercase S, Z, T, I, L and O, respectively) or 'r' (a mirrored L). If no parameter is passed, the block will be random.
@@ -55,6 +55,11 @@ function abstractBlock (myWorld, blockType) {
         return this;
     };
     
+    this.drop = function() {
+        while (this.stepDown());
+        return this;
+    }
+    
     this.printMe = function() {
 // exists for development & debugging purposes only; simple graphic representation out to the console
         var yx = [], x, y, i;
@@ -69,6 +74,56 @@ function abstractBlock (myWorld, blockType) {
         for (y = 0; y < yx.length; y++) {
             console.log(y + ": " + yx[y].join(" "));
         }
+    }
+    
+    this.clone = function() {
+        
+    }
+    
+    this.findBestPlace = function(func) {
+        var oldWell = this.myWorld,
+            oldPos = this.pos.slice(),
+            oldXY = this.xy.slice(),
+            y = this.pos[1],
+            well = this.myWorld.clone(),
+            bestScore = Infinity,
+            bestPlace,
+            score;
+        
+        this.myWorld = well;
+// testing all starting positions...
+        
+        for (var a = 0; a < 4; a++) {
+            for (var x = 0; x < well.width; x++) {
+                this.pos = [x, y];
+                if (!(this.collision(this.xy, this.pos))) {
+                        this.drop();
+                        this.myWorld.update(this);
+                        score = this.myWorld.calculatedScore(func);
+                        this.myWorld.remove(this);
+                        if (score < bestScore) {
+                            bestScore = score;
+                            bestPlace = {
+                                position: [x, y],
+                                angle: a
+                            }
+                        }
+                    }
+            }
+            this.pos = [this.myWorld.startPosition[0], y];
+            this.rotate();
+        }
+        this.myWorld = oldWell;
+        this.pos = oldPos;
+        this.xy = oldXY;
+        return bestPlace; 
+    }
+    
+    this.auto = function() {
+        var place = this.findBestPlace();
+        for (var i = 0; i < place.angle; i++)
+            this.rotate();
+        this.pos = place.position.slice();
     }
     
 //and doing the construction: 
@@ -86,7 +141,7 @@ function abstractBlock (myWorld, blockType) {
     };
 }
  
-function abstractWell (width, depth) {
+function AbstractWell (width, depth) {
 
 // abstract properties and methods for a well, regardless of the graphic representation
     
@@ -103,7 +158,7 @@ function abstractWell (width, depth) {
             this.wellArray.unshift(row);
         }
     };
-    
+  
     this.isRowFull = function (row) {
 // if all the fields in the row are occupied
         var notFull = row.reduce( function (a, b) { return a || b; }, 
@@ -115,6 +170,14 @@ function abstractWell (width, depth) {
 // returns a copy of a single row of the well array
         return this.wellArray[y].slice() || [];
     };
+    
+    this.clone = function() {
+        var newWell = new AbstractWell(this.width, this.depth);
+        for (var y = 0; y < this.depth; y++) {
+            newWell.wellArray[y] = this.rowAt(y);
+        }
+        return newWell;
+    }
     
     this.findFullRows = function() {
 // finds if there are any full rows. If there are, deletes them and updates the array. Returns the number of deleted rows.
@@ -131,8 +194,8 @@ function abstractWell (width, depth) {
         
     this.update = function(brick) {
 // puts the brick inside the well's array
-        var x, y;
-        for (var i = 0; i < 4; i++) {
+        var i, x, y;
+        for (i = 0; i < brick.xy.length; i++) {
             x = brick.xy[i][0] + brick.pos[0];
             y = brick.xy[i][1] + brick.pos[1];
             if( (this.wellArray[y] ) && ( this.wellArray[y][x] ) ) {
@@ -140,6 +203,17 @@ function abstractWell (width, depth) {
             }
         }
     };
+    
+    this.remove = function(brick) {
+// the opposite of 'update'
+        var i, x, y;
+        for (i = 0; i < brick.xy.length; i++) {
+            x = brick.xy[i][0] + brick.pos[0];
+            y = brick.xy[i][1] + brick.pos[1];
+            if( this.wellArray[y] ) 
+                this.wellArray[y][x] = 1;
+        }
+    }
 
     this.freeAt = function(x,y) {
 // is the indicated square in the well free?
@@ -151,6 +225,60 @@ function abstractWell (width, depth) {
         }
     };
 
+    this.columnTop = function() {
+        var result = new Array(this.width).fill(this.depth), x, y;
+        for (x = 0; x < this.width; x++) 
+            for (y = 0; y < this.depth; y++) {
+                if ( !( this.freeAt(x, y) ) ) {
+                    result [x] = y;
+                    break;
+                }
+            }
+        return result;
+    }
+    
+    this.maxHeight = function() {
+        return this.depth - Math.min.apply(this, this.columnTop());
+    }
+    
+    this.aggregateHeight = function() {
+        var depth = this.depth,
+            columnTop = this.columnTop();
+        return columnTop.reduce(function (a,b) {
+            return a + depth - b;
+        }, 0);
+    }
+    
+    this.fullRowsCount = function() {
+        var result = 0;
+        for (var y=0; y < this.depth; y++)
+            result += this.isRowFull(this.wellArray[y]) ? 1 : 0;
+        return result;
+    }
+    
+    this.holes = function() {
+        var result = 0, x, y;
+        for (x = 0; x< this.width; x++)
+            for (y = 1; y < this.depth; y++)
+                if (this.freeAt (x, y) && !(this.freeAt(x, y-1)) )
+                    result++;
+        return result;
+    }
+    
+    this.bumpiness = function() {
+        var heightArray = this.columnTop(), sum = 0, x;
+        for (x = 0; x < this.width - 1; x++)
+            sum += Math.abs(heightArray[x+1] - heightArray[x]);
+        return sum;
+    }
+    
+    this.calculatedScore = function(func) {
+        func = func || function (maxHeight, aggrHeight, holes, bumps, fullRows) {
+            return 30 * maxHeight /*+ aggrHeight */ + 40 * holes + bumps - 50 * fullRows;
+        }
+        return func(this.maxHeight(), this.aggregateHeight(), this.holes(), this.bumpiness(), this.fullRowsCount());
+    }
+    
     this.collision = function(newXY, newPos) {
     // checks whether moved/rotated brick would hit something, return true if so
         for (var i=0; i < newXY.length; i++) {
@@ -159,5 +287,9 @@ function abstractWell (width, depth) {
         return false;          
     }
     
+    
+    
     this.emptyRows();
+    this.startPosition = [Math.ceil(this.width / 2 ) - 1,
+                          2];
 }

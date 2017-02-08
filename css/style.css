@@ -86,9 +86,12 @@ button > i {
 .live-brick {
     background: linear-gradient(to bottom right, #f7c331, #ff4500);
     border-color: #551A8B;
-    box-shadow: 
-        1px 1px 3px rgba(10,22,18,0.5);
     z-index: 1;
+}
+
+#well > .live-brick {
+    box-shadow: 
+        1px 1px 3px rgba(10,22,18,0.5);    
 }
 
 .dead-brick {
@@ -146,6 +149,7 @@ button > i {
     margin-top: 1.5em;
     margin-top: 7vh;
     font-style: italic;
+    font-weight: bold;
 }
 
 #score {
