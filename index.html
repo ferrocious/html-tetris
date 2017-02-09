@@ -21,8 +21,8 @@
             <form id="setup-dialog">
               <span id="close-width-dialog">X</span>
                <legend>The well's width:</legend>
-                <input type="range" min = "8" max = "40" value = "10" id = "width-slider">
-                <input type="number" min = "8" max = "40" value = "10" id = "width-box">
+                <input type="range" min = "6" max = "18" value = "10" id = "width-slider">
+                <input type="number" min = "6" max = "18" value = "10" id = "width-box">
                 <button id="submit" type = submit>OK</button>
             </form>
         </main>
@@ -33,6 +33,7 @@
             <h2>Score:</h2>
             <p id = "score">0000</p>
             <button id="new-game">Play!</button>
+            <button id="auto">auto</button>
         </aside>
         <nav>
             <button class = "control-button" id = "left" data-key = "a">
@@ -51,6 +52,7 @@
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src = "script/abstract4game.js"></script>
+    <script src = "script/auto4game.js"></script>
     <script src = "script/html4game.js"></script>
     <script src = "script/script.js"></script>
 </html>

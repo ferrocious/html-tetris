@@ -143,13 +143,22 @@ button > i {
     left: 6.5vw;
 }
 
-#new-game {
+#new-game, #auto {
     width: 60%;
     padding: 0.5em;
     margin-top: 1.5em;
     margin-top: 7vh;
     font-style: italic;
     font-weight: bold;
+}
+
+#auto {
+    margin-top: 0.5em;
+    background: green;
+}
+
+#auto.auto-on {
+    background: red;
 }
 
 #score {

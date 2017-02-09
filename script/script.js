@@ -8,36 +8,20 @@
         $widthSlider,
         $setupDialog,
         paused = false,
+        autoplay = false,
         maxWidth,
         minWidth,
         currentWidth = 10,
         well,
         preview,
-        currentBlock, 
-        nextBlock,
+        currentBrick, 
+        nextBrick,
         lineCount = 0, 
+        defaultStep = 1600,
         step = 200, 
         gameLoopId = 0, 
         animationId = 0;
-
-    function getNewBlock(well, preview) {
-        currentBlock = nextBlock.rebase(well).initHtml();
-        preview.clear();
-        nextBlock = new HTMLBlock(preview);
-        nextBlock.initHtml();
-    }
-
-    function unpauseGame() {
-    // Just clear all and every window possibly imposed on the well, restart the loops and reattach the keyboard listener.
-        $paused.hide();
-        $setupDialog.hide();
-        $gameOver.hide();
-        paused = false;
-        gameLoopId = setTimeout(gameLoop, step);
-        animationId = window.requestAnimationFrame(animationLoop);
-        attachKeys();
-    }
-
+    
     function pauseGame() {
         window.clearTimeout(gameLoopId);
         window.cancelAnimationFrame(animationId);
@@ -54,11 +38,30 @@
         }
     }
 
+    function toggleAuto() {
+        autoplay = !autoplay;
+        $(this).toggleClass("auto-on");
+        this.blur();
+    }
+
+    function unpauseGame() {
+    // Just clear all and every window possibly imposed on the well, restart the loops and reattach the keyboard listener.
+        $paused.hide();
+        $setupDialog.hide();
+        $gameOver.hide();
+        paused = false;
+        gameLoopId = setTimeout(gameLoop, step);
+        animationId = window.requestAnimationFrame(animationLoop);
+        attachKeys();
+    }
+
     function gameOver() {
         $gameOver.show();
         window.clearTimeout(gameLoopId);
+        gameLoopId = 0;
         window.cancelAnimationFrame(animationId);
-        currentBlock = null;
+        animationId = 0;
+        currentBrick = null;
     }
 
     function bringResizeDialog() {
@@ -90,26 +93,42 @@
             var curVal = parseInt($widthBox.val());
             curVal = Math.min(curVal, maxWidth);
             curVal = Math.max(curVal, minWidth);
-            $widthSlider.val($widthBox.val(curVal));
+            $widthSlider.val(curVal);
         });
     }
+
+/*
 
     function readKeyboard(e) {
         if (paused) {
             unpauseGame();
             return;
         }
-        if (!(currentBlock)) return;
+        if (!(currentBrick)) return;
         switch (e.key.toLowerCase()) {
-            case "a": currentBlock.moveLeft();
+            case " ": currentBrick.drop();
                 break;
-            case "d": currentBlock.moveRight();
+            case "p": togglePause();
+        }
+    }
+
+
+*/
+
+    function readKeyboard(e) {
+        if (paused) {
+            unpauseGame();
+            return;
+        }
+        if (!(currentBrick)) return;
+        switch (e.key.toLowerCase()) {
+            case "a": currentBrick.moveLeft();
                 break;
-            case "s": currentBlock.rotate();
+            case "d": currentBrick.moveRight();
                 break;
-            case " ": currentBlock.drop();
+            case "s": currentBrick.rotate();
                 break;
-            case ".": currentBlock.auto();
+            case " ": currentBrick.drop();
                 break;
             case "p": togglePause();
         }
@@ -130,32 +149,59 @@
     }
 
     function animationLoop() {
-        if(currentBlock)
-            currentBlock.updateHtml();
+        if(currentBrick)
+            currentBrick.updateHtml();
         $scoreHtml.html(lineCount.toString());
         animationId = window.requestAnimationFrame(animationLoop);
     }
 
+    protoBrick.playMe = function() {
+        var bestPlace = this.findBestPlace();
+        for (var a = 0; a < bestPlace.angle; a++)
+            this.rotate();
+        while ( (this.pos[0] > bestPlace.position[0] ) && (this.moveLeft()  ) ); // I wouldn't write it this way if not for JS's lazy evaluation.
+        while ( (this.pos[0] < bestPlace.position[0] ) && (this.moveRight() ) );
+    }
+
+    function getNewBrick(well, preview) {
+        currentBrick = nextBrick.rebase(well).initHtml();
+        preview.clear();
+        nextBrick = Object.create(protoBrick);
+        nextBrick.init(preview);
+        nextBrick.initHtml();
+    }
+
     function gameLoop() {
-        if(currentBlock.stepDown()) {
+        if(currentBrick.stepDown()) {
     // if it can fall, let it
             gameLoopId = setTimeout (gameLoop, step);
         } else {
     // and if it cannot: update the well with new bricks,
-            currentBlock.updateHtml();     
-    /* that additional updateHtml, out of the animation loop, is necessary, as, every now and then, 
-    weird timing would make a brick "killed" before the last update of the graphical representation 
-    was made. Result: a brick looking as if hovering one row too high. */
-
-            lineCount += currentBlock.done();  // The done() method, among doing other things, returns the number of lines that got completed and removed from the well.
-    // get another block: can it move at all?
-            getNewBlock(well, preview);
-            if (currentBlock.collision(currentBlock.xy, currentBlock.pos)) {
+            currentBrick.updateHtml();
+                /* that additional updateHtml, out of the animation loop, is necessary, as, every now and then, 
+                weird timing would make a brick "killed" before the last update of the graphical representation 
+                was made. Result: a brick looking as if hovering one row too high. */
+            lineCount += currentBrick.done();  // The done() method, among doing other things, returns the number of lines that got completed and removed from the well.
+                // get another block: can it move at all?
+            getNewBrick(well, preview);
+            if ( currentBrick.collision() ) {
                 gameOver();
                 return;
             }
-        gameLoopId = setTimeout(gameLoop, step);    
+            if (autoplay)
+                currentBrick.playMe();
+            gameLoopId = setTimeout(gameLoop, step);    
         }
+    }
+
+    function initGame() {
+        lineCount = 0;
+        window.clearTimeout(gameLoopId);
+        well.resetDeadBlocks();
+        nextBrick = Object.create(protoBrick);
+        nextBrick.init(preview);
+        getNewBrick(well, preview);
+        unpauseGame();
     }
 
     function resizeGame(x) {
@@ -166,23 +212,16 @@
             "; height: " +
             height + 
             "; }";
-        well = new HTMLWell($well, x);
+        well = Object.create(protoWell);
+        well.htmlInit(x, $well);
+        step = Math.max(defaultStep / x, 20);
         $styleSlot.empty().html(newcss);
         well.fillWithRubble();
         paused = false;
     }
 
-    function initGame() {
-        lineCount = 0;
-        window.clearTimeout(gameLoopId);
-        well.resetDeadBlocks();
-        nextBlock = new HTMLBlock(preview);
-        getNewBlock(well, preview);
-        unpauseGame();
-    }
-
     function initPreview(htmlTarget) {
-        preview = Object.create(well);
+        preview = Object.create(protoWell);
         preview.htmlTarget = htmlTarget;
         preview.sqHeight = ["0", "50%"];
         preview.sqWidth = ["0", "25%", "50%", "75%"];
@@ -190,7 +229,6 @@
     }
 
     window.onload =  function initController() {
-
     // First, cache the DOM elements.    
         $well = $("#well");
         $scoreHtml = $("#score");
@@ -202,8 +240,8 @@
         $setupDialog = $("#setup-dialog");
 
     // Second, init the logic of the well and the preview window.    
-
-        well = new HTMLWell($("#well"));
+        well = Object.create(protoWell);
+        well.htmlInit(currentWidth, $well);
         initPreview($("#next"));
         well.fillWithRubble(); // Only for presentation, the game always starts with a nice, clean well.
 
@@ -214,6 +252,7 @@
         $("#left").off('click').click(readButton);
         $("#right").off('click').click(readButton);
         $("#rotate").off('click').click(readButton);
+        $("#auto").off('click').click(toggleAuto);
         $("#new-game").click(
             function() {
                 this.blur();
@@ -224,4 +263,6 @@
         $("#setup-width").click(bringResizeDialog);
         $("#close-width-dialog").click(unpauseGame);
     }
+    
+
 // })();
