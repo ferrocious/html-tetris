@@ -45,11 +45,96 @@ protoWell.bumpiness = function() {
     return sum;
 }
 
-protoWell.calculatedScore = function(func) {
+/*protoWell.calculatedScore = function(func) {
+    var a = performance.now(), b;
     func = func || function (maxHeight, aggrHeight, holes, bumps, fullRows) {
         return 20 * maxHeight + 1.2 * aggrHeight + 25 * holes + bumps - 120 * fullRows;
     }
-    return func(this.maxHeight(), this.aggregateHeight(), this.holes(), this.bumpiness(), this.fullRowsCount());
+    var result = func(this.maxHeight(), this.aggregateHeight(), this.holes(), this.bumpiness(), this.fullRowsCount());
+    b = performance.now();
+    console.log("The function needed " + (b-a) + "ms.");
+    return result;
+} */
+
+/*
+function transposeArray(array){
+        arrayLength = array[0].length;
+        var newArray = [];
+        for(var i = 0; i < arrayLength; i++){
+            newArray.push([]);
+        };
+
+        for(i = 0; i < array.length; i++){
+            for(var j = 0; j < arrayLength; j++){
+                newArray[j].push(array[i][j]);
+            };
+        };
+        return newArray;
+}
+
+
+
+*/
+
+protoWell.calculatedScore = function(func) {
+    var a = performance.now(), b;
+    function transposeArray(array){
+        arrayLength = array[0].length;
+        var newArray = [];
+        for(var i = 0; i < arrayLength; i++){
+            newArray.push([]);
+        };
+
+        for(i = 0; i < array.length; i++){
+            for(var j = 0; j < arrayLength; j++){
+                newArray[j].push(array[i][j]);
+            };
+        };
+        return newArray;
+    }
+    func = func || 
+        function (maxHeight, aggrHeight, holes, bumps, fullRows) {
+            return 20 * maxHeight + 1.2 * aggrHeight + 25 * holes + bumps - 120 * fullRows;
+        }
+    function analyzeColumn(columnNumber) {
+        var column = transposedWell[columnNumber];
+        thisColHeight = depth;
+        for ( var y = depth - 1; y > 0; y--) {
+            if ( (column[y]) && (!(column[y-1])) )
+                holes++;
+            if (!(column[y]))
+                thisColHeight = y;
+            if (columnNumber > 0)
+                column[y] = column [y] || transposedWell[columnNumber - 1][y];
+        }
+        thisColHeight = depth - thisColHeight;
+    }
+    
+    var transposedWell = transposeArray(this.wellArray),
+        width = transposedWell.length,
+        depth = transposedWell[0].length,
+        holes = 0, bumps = 0, aHeight = 0, maxHeight = 0, fullRows = 0,
+        leftColHeight, thisColHeight,
+        x, y;
+    analyzeColumn(0);
+    for (x = 1; x < width; x++)
+        {
+            leftColHeight = thisColHeight;
+            aHeight += thisColHeight;
+            maxHeight = Math.max(maxHeight, thisColHeight);
+            analyzeColumn(x);
+            bumps += Math.abs(thisColHeight - leftColHeight);
+        }
+    aHeight += thisColHeight;
+    maxHeight = Math.max(maxHeight, thisColHeight);
+    for (y = 0; y < depth; y++)
+        if (!(transposedWell[width - 1][y]))
+            fullRows++;
+    var result = func(maxHeight, aHeight, holes, bumps, fullRows);
+    b = performance.now();
+    console.log("The function needed " + (b-a) + "ms.");
+    return result;
+    
 }
 
 protoBrick.findBestPlace = function(func) {
