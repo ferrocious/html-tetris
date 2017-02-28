@@ -159,8 +159,8 @@
         var bestPlace = this.findBestPlace();
         for (var a = 0; a < bestPlace.angle; a++)
             this.rotate();
-        while ( (this.pos[0] > bestPlace.position[0] ) && (this.moveLeft()  ) ); // I wouldn't write it this way if not for JS's lazy evaluation.
-        while ( (this.pos[0] < bestPlace.position[0] ) && (this.moveRight() ) );
+        while ( (this.getPos()[0] > bestPlace.position[0] ) && (this.moveLeft()  ) ); // I wouldn't write it this way if not for JS's lazy evaluation.
+        while ( (this.getPos()[0] < bestPlace.position[0] ) && (this.moveRight() ) );
     }
 
     function getNewBrick(well, preview) {

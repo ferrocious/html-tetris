@@ -54,6 +54,14 @@ var protoBrick = {
         return this;
     },
     
+    getPos: function() {
+        return this.pos.slice();
+    },
+    
+    setPos: function(newPos) {
+        this.pos = newPos.slice();
+    },
+    
     printMe: function() {
 // exists for development & debugging purposes only; simple graphic representation out to the console
         var yx = [], x, y, i;

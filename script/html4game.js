@@ -13,14 +13,13 @@ protoWell.htmlInit = function(width, htmlTarget) {
     this.sqWidth = [];
     this.sqHeight = [];
     this.width = width || 10;
-    this.depth = 2 * this.width;
+    this.depth = 2 * this.width + 2;
     this.resetDeadBlocks();
-    this.calculateSquareSize();    
+    this.calculateSquareSize();
 }
 
 protoWell.createHtmlSquare = function(x, y) {
-/* Builds a basic square building block of the game; x and y are expressed in abstract coordinates.
-If the given position is already occupied, the function does nothing and returns false. */
+/* Builds a basic square building block of the game; x and y are expressed in abstract coordinates. */
     var newDiv = $("<div></div>").basicSquare(this.sqWidth[1], this.sqHeight[1]);
     if(this.moveHtmlSquare(newDiv, x, y) ) {
         this.append(newDiv);
@@ -93,7 +92,7 @@ protoWell.repaint = function() {
 
 protoBrick.rebase = function(newWorld) {
     this.myWorld = newWorld;
-    this.pos = [this.myWorld.startPosition[0], this.myWorld.startPosition[1]];
+    this.setPos(this.myWorld.startPosition.slice());
     return this;
 }
     
@@ -104,13 +103,14 @@ protoBrick.rebase = function(newWorld) {
 protoBrick.initHtml = function() {
 // Initializes the visual representation of the 4-square block, placing it according to its 'pos' property.
     this.resetBlocks();
-    var newDiv;
+    var newDiv,
+        pos = this.getPos();
     for (var i = 0; i < this.xy.length; i++ ) {
         newDiv = $("<div></div>").basicSquare (0, 0);
         this.myWorld.moveHtmlSquare(
             newDiv,
-            this.pos[0] + this.xy[i][0],
-            this.pos[1] + this.xy[i][1]);                    
+            pos[0] + this.xy[i][0],
+            pos[1] + this.xy[i][1]);                    
         this.myWorld.append(newDiv);
         this.htmlSquares.push(newDiv);
     }
@@ -119,12 +119,13 @@ protoBrick.initHtml = function() {
     
 protoBrick.updateHtml = function() {
 // Moves a block if its visual representation exists, creates if doesn't.
+    pos = this.getPos();
     if (this.htmlSquares) 
         for (var i = 0; i < this.htmlSquares.length; i++ ) {
             this.myWorld.moveHtmlSquare(
                 this.htmlSquares[i],
-                this.pos[0] + this.xy[i][0],
-                this.pos[1] + this.xy[i][1]
+                pos[0] + this.xy[i][0],
+                pos[1] + this.xy[i][1]
             );
         } else
             this.initHtml();
