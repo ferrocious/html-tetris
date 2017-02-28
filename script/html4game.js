@@ -29,8 +29,10 @@ protoWell.createHtmlSquare = function(x, y) {
 }
 
 protoWell.moveHtmlSquare = function (div, x, y) {
-// Simple: if movable, that is, if the indicated place in the well is unocuppied - move it.
+// If not out of bounds - put the square there.
     if((x >= this.width) || (y >= this.depth) ) return false;
+    if (y < 2) return div;
+    y -= 2;
     return div
         .css("left", this.sqWidth[x])
         .css("top", this.sqHeight[y])
@@ -79,11 +81,11 @@ protoWell.repaint = function() {
    (x, y) on the board, we express it in CSS terms as: left: sqWidth[x]; top: sqHeight[y].
    */
     var x = 100 / this.width,
-        y = 100 / this.depth;
+        y = 100 / (this.depth - 2);
     for (var i = 0; i < this.width; i++) {
         this.sqWidth[i] = (x * i).toFixed(3) + "%";
     }
-    for (var i = 0; i < this.depth; i++) {
+    for (var i = 0; i < this.depth - 2; i++) {
         this.sqHeight[i] = (y * i).toFixed(3) + "%";
     }
 }
@@ -120,13 +122,20 @@ protoBrick.initHtml = function() {
 protoBrick.updateHtml = function() {
 // Moves a block if its visual representation exists, creates if doesn't.
     pos = this.getPos();
-    if (this.htmlSquares) 
-        for (var i = 0; i < this.htmlSquares.length; i++ ) {
-            this.myWorld.moveHtmlSquare(
-                this.htmlSquares[i],
-                pos[0] + this.xy[i][0],
-                pos[1] + this.xy[i][1]
-            );
+    if (this.htmlSquares)
+        {
+            for (var i = 0; i < this.htmlSquares.length; i++ ) {
+                this.myWorld.moveHtmlSquare(
+                    this.htmlSquares[i],
+                    pos[0] + this.xy[i][0],
+                    pos[1] + this.xy[i][1]
+                );
+            if (pos[1] + this.xy[i][1] < 2)
+                this.htmlSquares[i].addClass("hidden");
+            else
+                this.htmlSquares[i].removeClass("hidden");
+                
+            }
         } else
             this.initHtml();
 }

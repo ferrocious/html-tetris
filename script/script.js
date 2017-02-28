@@ -157,10 +157,13 @@
 
     protoBrick.playMe = function() {
         var bestPlace = this.findBestPlace();
-        for (var a = 0; a < bestPlace.angle; a++)
+        for (var a = 0; a < bestPlace.angle; a++) {
             this.rotate();
-        while ( (this.getPos()[0] > bestPlace.position[0] ) && (this.moveLeft()  ) ); // I wouldn't write it this way if not for JS's lazy evaluation.
+//            this.updateHtml();
+        }
+        while ( (this.getPos()[0] > bestPlace.position[0] ) && (this.moveLeft()  ) );
         while ( (this.getPos()[0] < bestPlace.position[0] ) && (this.moveRight() ) );
+//            this.updateHtml();
     }
 
     function getNewBrick(well, preview) {
@@ -225,6 +228,13 @@
         preview.htmlTarget = htmlTarget;
         preview.sqHeight = ["0", "50%"];
         preview.sqWidth = ["0", "25%", "50%", "75%"];
+        preview.moveHtmlSquare = function (div, x, y) {
+        // Simple: if movable, that is, if the indicated place in the well is unocuppied - move it.
+            if((x >= this.width) || (y >= this.depth) ) return false;
+            return div
+                .css("left", this.sqWidth[x])
+                .css("top", this.sqHeight[y]);
+        }        
         preview.startPosition = [2, 0];
     }
 

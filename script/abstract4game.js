@@ -84,7 +84,7 @@ var protoBrick = {
         blockType = blockType || this.randomType();
         switch (blockType) {
             case "s" : this.xy = [ [ -1, 1 ], [ 0, 1 ],  [ 0,  0 ], [ 1, 0 ] ]; break;            
-            case "t" : this.xy = [ [ -1, 0 ], [ 0, 0 ],  [ 1,  0 ], [ 0, 1 ] ]; break;            
+            case "t" : this.xy = [ [ -1, 1 ], [ 0, 1 ],  [ 1,  1 ], [ 0, 0 ] ]; break;            
             case "z" : this.xy = [ [ -1, 0 ], [ 0, 1 ],  [ 0,  0 ], [ 1, 1 ] ]; break;
             case "o" : this.xy = [ [ -1, 0 ], [ 0, 0 ],  [-1,  1 ], [ 0, 1 ] ]; break;
             case "i" : this.xy = [ [ -2, 0 ], [-1, 0 ],  [ 0,  0 ], [ 1, 0 ] ]; break;

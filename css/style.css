@@ -89,6 +89,10 @@ button > i {
     z-index: 1;
 }
 
+.hidden {
+    opacity: 0;
+}
+
 #well > .live-brick {
     box-shadow: 
         1px 1px 3px rgba(10,22,18,0.5);    
