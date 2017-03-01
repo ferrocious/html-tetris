@@ -1,14 +1,14 @@
+var protoHtmlWell = Object.create(protoWell);
 
-
-protoWell.clear = function() {
+protoHtmlWell.clear = function() {
     this.htmlTarget.empty();
 }
 
-protoWell.append = function(elem) {
+protoHtmlWell.append = function(elem) {
     this.htmlTarget.append(elem);
 } 
 
-protoWell.htmlInit = function(width, htmlTarget) {
+protoHtmlWell.htmlInit = function(width, htmlTarget) {
     this.htmlTarget = htmlTarget;
     this.sqWidth = [];
     this.sqHeight = [];
@@ -18,7 +18,7 @@ protoWell.htmlInit = function(width, htmlTarget) {
     this.calculateSquareSize();
 }
 
-protoWell.createHtmlSquare = function(x, y) {
+protoHtmlWell.createHtmlSquare = function(x, y) {
 /* Builds a basic square building block of the game; x and y are expressed in abstract coordinates. */
     var newDiv = $("<div></div>").basicSquare(this.sqWidth[1], this.sqHeight[1]);
     if(this.moveHtmlSquare(newDiv, x, y) ) {
@@ -28,7 +28,7 @@ protoWell.createHtmlSquare = function(x, y) {
         return false;
 }
 
-protoWell.moveHtmlSquare = function (div, x, y) {
+protoHtmlWell.moveHtmlSquare = function (div, x, y) {
 // If not out of bounds - put the square there.
     if((x >= this.width) || (y >= this.depth) ) return false;
     if (y < 2) return div;
@@ -38,19 +38,19 @@ protoWell.moveHtmlSquare = function (div, x, y) {
         .css("top", this.sqHeight[y])
 }
 
-protoWell.resetDeadBlocks = function() {
+protoHtmlWell.resetDeadBlocks = function() {
 // Initializes, or re-initializes for a new game, the well.        
     this.init(this.width, this.depth);
     this.clear();
 }
 
-protoWell.rebuildOldBlocks = function() {
+protoHtmlWell.rebuildOldBlocks = function() {
 // removes all the fallen bricks and recreates the stack, based on the abstract well
     this.clear();
     this.repaint();
 }
 
-protoWell.repaint = function() {
+protoHtmlWell.repaint = function() {
 // "Repaint" mean: put again visual representation of dead bricks on screen.
     var newDiv;
     for (var x = 0; x < this.width; x++) {
@@ -63,7 +63,7 @@ protoWell.repaint = function() {
     } // for x...    
 }
         
- protoWell.fillWithRubble = function() {
+ protoHtmlWell.fillWithRubble = function() {
 /* Haphazardly drops some bricks at the bottom of the well. It's used solely for decoration and as a visual
     hint at relative sizes of the well and the bricks. */
     for (var y = this.depth - 1; y > this.depth - 5; y--)
@@ -75,7 +75,7 @@ protoWell.repaint = function() {
     this.repaint();
 }
 
- protoWell.calculateSquareSize = function() {
+ protoHtmlWell.calculateSquareSize = function() {
 /* Sets the size of a basic square. For a default, 10-wide, 20-high well, the basic square would be 10% wide and 5% high. Which does make a square.
    Also, caches the coordinates, expressed in %, of every field on the board. Hence, if we want to put a square with the coordinates        
    (x, y) on the board, we express it in CSS terms as: left: sqWidth[x]; top: sqHeight[y].
@@ -92,17 +92,13 @@ protoWell.repaint = function() {
 
 // HTML brick methods go here
 
-protoBrick.rebase = function(newWorld) {
-    this.myWorld = newWorld;
-    this.setPos(this.myWorld.startPosition.slice());
-    return this;
-}
+var protoHtmlBrick = Object.create(protoBrick);
     
- protoBrick.resetBlocks = function() {
+protoHtmlBrick.resetBlocks = function() {
     this.htmlSquares =  [];
 }
      
-protoBrick.initHtml = function() {
+protoHtmlBrick.initHtml = function() {
 // Initializes the visual representation of the 4-square block, placing it according to its 'pos' property.
     this.resetBlocks();
     var newDiv,
@@ -119,7 +115,7 @@ protoBrick.initHtml = function() {
     return this;
 }
     
-protoBrick.updateHtml = function() {
+protoHtmlBrick.updateHtml = function() {
 // Moves a block if its visual representation exists, creates if doesn't.
     pos = this.getPos();
     if (this.htmlSquares)
@@ -140,21 +136,21 @@ protoBrick.updateHtml = function() {
             this.initHtml();
 }
     
-protoBrick.addClass = function (newClass) {
+protoHtmlBrick.addClass = function (newClass) {
     for (var i = 0; i < this.htmlSquares.length; i++) {
         this.htmlSquares[i].addClass(newClass);
     }
     return this;
 }
 
-protoBrick.removeClass = function (oldClass) {
+protoHtmlBrick.removeClass = function (oldClass) {
     for (var i = 0; i < this.htmlSquares.length; i++) {
         this.htmlSquares[i].removeClass(oldClass);
     }
     return this;
 }
         
-protoBrick.done = function() {
+protoHtmlBrick.done = function() {
 /* When we're done with a block (it's fallen to the bottom), we: update the well's abstract model, paint the brick dead, and also tells the well to find and remove any full rows. Returns their number, if there were any.
 */
     var block,

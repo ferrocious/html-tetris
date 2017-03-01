@@ -1,4 +1,4 @@
-// (function() {
+(function() {
     var $scoreHtml,
         $gameOver,
         $styleSlot,
@@ -169,7 +169,7 @@
     function getNewBrick(well, preview) {
         currentBrick = nextBrick.rebase(well).initHtml();
         preview.clear();
-        nextBrick = Object.create(protoBrick);
+        nextBrick = Object.create(protoHtmlBrick);
         nextBrick.init(preview);
         nextBrick.initHtml();
     }
@@ -201,7 +201,7 @@
         lineCount = 0;
         window.clearTimeout(gameLoopId);
         well.resetDeadBlocks();
-        nextBrick = Object.create(protoBrick);
+        nextBrick = Object.create(protoHtmlBrick);
         nextBrick.init(preview);
         getNewBrick(well, preview);
         unpauseGame();
@@ -215,7 +215,7 @@
             "; height: " +
             height + 
             "; }";
-        well = Object.create(protoWell);
+        well = Object.create(protoHtmlWell);
         well.htmlInit(x, $well);
         step = Math.max(defaultStep / x, 20);
         $styleSlot.empty().html(newcss);
@@ -224,7 +224,7 @@
     }
 
     function initPreview(htmlTarget) {
-        preview = Object.create(protoWell);
+        preview = Object.create(protoHtmlWell);
         preview.htmlTarget = htmlTarget;
         preview.sqHeight = ["0", "50%"];
         preview.sqWidth = ["0", "25%", "50%", "75%"];
@@ -250,7 +250,7 @@
         $setupDialog = $("#setup-dialog");
 
     // Second, init the logic of the well and the preview window.    
-        well = Object.create(protoWell);
+        well = Object.create(protoHtmlWell);
         well.htmlInit(currentWidth, $well);
         initPreview($("#next"));
         well.fillWithRubble(); // Only for presentation, the game always starts with a nice, clean well.
@@ -272,7 +272,6 @@
         handleWidthChange();
         $("#setup-width").click(bringResizeDialog);
         $("#close-width-dialog").click(unpauseGame);
-    }
-    
+    }    
 
-// })();
+})();

@@ -62,6 +62,12 @@ var protoBrick = {
         this.pos = newPos.slice();
     },
     
+    rebase: function(newWorld) {
+    this.myWorld = newWorld;
+    this.setPos(this.myWorld.startPosition.slice());
+    return this;
+},
+    
     printMe: function() {
 // exists for development & debugging purposes only; simple graphic representation out to the console
         var yx = [], x, y, i;
