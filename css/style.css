@@ -158,11 +158,11 @@ button > i {
 
 #auto {
     margin-top: 0.5em;
-    background: green;
 }
 
-#auto.auto-on {
-    background: red;
+.auto-on {
+    background-color: #FFD03E;
+    box-shadow: 0 0 5px 5px rgba(255, 246, 100, 0.7);
 }
 
 #score {
@@ -175,7 +175,7 @@ button > i {
     padding-right: 0.5em;
 }
 
-#game-over, #paused, #setup-dialog {
+.pop-up-window {
     background-color: #FEFCFB;
     width: 90%;
     left: 5%;
@@ -191,7 +191,7 @@ button > i {
     display: none;
     z-index: 2;
     cursor: default;
-    opacity: 0.95;
+    opacity: 0.95;    
 }
 
 #setup-dialog {
@@ -282,7 +282,6 @@ And the additional media query is for windows even wider. At this moment, the UI
     
     #score {
         font-size: 3.5vh;
-        background-color: #FEFCFB;
     }    
     #well {
         height: 65.25vh;
@@ -341,11 +340,7 @@ And the additional media query is for windows even wider. At this moment, the UI
     h2 {
         font-size: 4vh;
     }
-    
-    #score {
-        font-size: 3.5vh;
-        background-color: #FEFCFB;
-    }    
+   
     #well {
         left: 11.6025vh;
     }
